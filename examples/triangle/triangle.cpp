@@ -178,7 +178,7 @@ public:
 	void createSynchronizationPrimitives()
 	{
 		for (uint32_t i = 0; i < MAX_CONCURRENT_FRAMES; i++) {
-			
+
 			// Semaphores (Used for correct command ordering)
 			VkSemaphoreCreateInfo semaphoreCI{};
 			semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -424,7 +424,7 @@ public:
 	}
 
 	// Shaders access data using descriptor sets that "point" at our uniform buffers
-	// The descriptor sets make use of the descriptor set layouts created above 
+	// The descriptor sets make use of the descriptor set layouts created above
 	void createDescriptorSets()
 	{
 		// Allocate one descriptor set per frame from the global descriptor pool
@@ -440,7 +440,7 @@ public:
 			// For every binding point used in a shader there needs to be one
 			// descriptor set matching that binding point
 			VkWriteDescriptorSet writeDescriptorSet{};
-			
+
 			// The buffer's information is passed using a descriptor info structure
 			VkDescriptorBufferInfo bufferInfo{};
 			bufferInfo.buffer = uniformBuffers[i].buffer;
@@ -519,7 +519,7 @@ public:
 			// Color attachment is the view of the swapchain image
 			attachments[0] = swapChain.buffers[i].view;
 			// Depth/Stencil attachment is the same for all frame buffers due to how depth works with current GPUs
-			attachments[1] = depthStencil.view;         
+			attachments[1] = depthStencil.view;
 
 			VkFramebufferCreateInfo frameBufferCI{};
 			frameBufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -1006,7 +1006,7 @@ public:
 		submitInfo.commandBufferCount = 1;                           // One command buffer
 
 		// Semaphore to wait upon before the submitted command buffer starts executing
-		submitInfo.pWaitSemaphores = &presentCompleteSemaphores[currentFrame]; 
+		submitInfo.pWaitSemaphores = &presentCompleteSemaphores[currentFrame];
 		// Semaphore to be signaled when command buffers have completed
 		submitInfo.pSignalSemaphores = &renderCompleteSemaphores[currentFrame];
 
