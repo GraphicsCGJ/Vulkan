@@ -207,8 +207,16 @@ public:
 		VK_CHECK_RESULT(vkCreateCommandPool(device, &commandPoolCI, nullptr, &commandPool));
 
 		// Allocate one command buffer per max. concurrent frame from above pool
-		VkCommandBufferAllocateInfo cmdBufAllocateInfo = vks::initializers::commandBufferAllocateInfo(commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, MAX_CONCURRENT_FRAMES);
-		VK_CHECK_RESULT(vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, commandBuffers.data()));
+		VkCommandBufferAllocateInfo cmdBufAllocateInfo =
+			vks::initializers::commandBufferAllocateInfo(
+				commandPool,
+				VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+				MAX_CONCURRENT_FRAMES
+			);
+
+		VK_CHECK_RESULT(vkAllocateCommandBuffers(device,
+			&cmdBufAllocateInfo,
+			commandBuffers.data()));
 	}
 
 	// Prepare vertex and index buffers for an indexed triangle
@@ -273,7 +281,10 @@ public:
 		memAlloc.allocationSize = memReqs.size;
 		// Request a host visible memory type that can be used to copy our data do
 		// Also request it to be coherent, so that writes are visible to the GPU right after unmapping the buffer
-		memAlloc.memoryTypeIndex = getMemoryTypeIndex(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		memAlloc.memoryTypeIndex =
+			getMemoryTypeIndex(memReqs.memoryTypeBits,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
 		VK_CHECK_RESULT(vkAllocateMemory(device, &memAlloc, nullptr, &stagingBuffers.vertices.memory));
 		// Map and copy
 		VK_CHECK_RESULT(vkMapMemory(device, stagingBuffers.vertices.memory, 0, memAlloc.allocationSize, 0, &data));
@@ -909,7 +920,14 @@ public:
 		// Get the next swap chain image from the implementation
 		// Note that the implementation is free to return the images in any order, so we must use the acquire function and can't just cycle through the images
 		uint32_t imageIndex;
-		VkResult result = vkAcquireNextImageKHR(device, swapChain.swapChain, UINT64_MAX, presentCompleteSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+		VkResult result = vkAcquireNextImageKHR(
+			device,
+			swapChain.swapChain,
+			UINT64_MAX,
+			presentCompleteSemaphores[currentFrame],
+			VK_NULL_HANDLE,
+			&imageIndex);
+
 		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 			windowResize();
 			return;
@@ -956,11 +974,17 @@ public:
 		renderPassBeginInfo.clearValueCount = 2;
 		renderPassBeginInfo.pClearValues = clearValues;
 		renderPassBeginInfo.framebuffer = frameBuffers[imageIndex];
-		VK_CHECK_RESULT(vkBeginCommandBuffer(commandBuffers[currentBuffer], &cmdBufInfo));
+		VK_CHECK_RESULT(
+			vkBeginCommandBuffer(
+				commandBuffers[currentBuffer],
+				&cmdBufInfo));
 
 		// Start the first sub pass specified in our default render pass setup by the base class
 		// This will clear the color and depth attachment
-		vkCmdBeginRenderPass(commandBuffers[currentBuffer], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+		vkCmdBeginRenderPass(commandBuffers[currentBuffer],
+			&renderPassBeginInfo,
+			VK_SUBPASS_CONTENTS_INLINE);
+
 		// Update dynamic viewport state
 		VkViewport viewport{};
 		viewport.height = (float)height;
@@ -968,6 +992,7 @@ public:
 		viewport.minDepth = (float)0.0f;
 		viewport.maxDepth = (float)1.0f;
 		vkCmdSetViewport(commandBuffers[currentBuffer], 0, 1, &viewport);
+
 		// Update dynamic scissor state
 		VkRect2D scissor{};
 		scissor.extent.width = width;
@@ -975,18 +1000,43 @@ public:
 		scissor.offset.x = 0;
 		scissor.offset.y = 0;
 		vkCmdSetScissor(commandBuffers[currentBuffer], 0, 1, &scissor);
-		// Bind descriptor set for the currrent frame's uniform buffer, so the shader uses the data from that buffer for this draw
-		vkCmdBindDescriptorSets(commandBuffers[currentBuffer], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &uniformBuffers[currentBuffer].descriptorSet, 0, nullptr);
+
+		// Bind descriptor set for the currrent frame's uniform buffer,
+		// so the shader uses the data from that buffer for this draw
+		vkCmdBindDescriptorSets(
+			commandBuffers[currentBuffer],
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			pipelineLayout,
+			0,
+			1,
+			&uniformBuffers[currentBuffer].descriptorSet,
+			0,
+			nullptr);
+
 		// Bind the rendering pipeline
 		// The pipeline (state object) contains all states of the rendering pipeline, binding it will set all the states specified at pipeline creation time
-		vkCmdBindPipeline(commandBuffers[currentBuffer], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+		vkCmdBindPipeline(
+			commandBuffers[currentBuffer],
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			pipeline);
+
 		// Bind triangle vertex buffer (contains position and colors)
 		VkDeviceSize offsets[1]{ 0 };
-		vkCmdBindVertexBuffers(commandBuffers[currentBuffer], 0, 1, &vertices.buffer, offsets);
+		vkCmdBindVertexBuffers(commandBuffers[currentBuffer],
+		0,
+		1,
+		&vertices.buffer,
+		offsets);
+
 		// Bind triangle index buffer
-		vkCmdBindIndexBuffer(commandBuffers[currentBuffer], indices.buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdBindIndexBuffer(commandBuffers[currentBuffer],
+			indices.buffer,
+			0,
+			VK_INDEX_TYPE_UINT32);
+
 		// Draw indexed triangle
 		vkCmdDrawIndexed(commandBuffers[currentBuffer], indices.count, 1, 0, 0, 1);
+
 		vkCmdEndRenderPass(commandBuffers[currentBuffer]);
 		// Ending the render pass will add an implicit barrier transitioning the frame buffer color attachment to
 		// VK_IMAGE_LAYOUT_PRESENT_SRC_KHR for presenting it to the windowing system

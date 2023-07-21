@@ -1,6 +1,6 @@
 /*
 * Class wrapping access to the swap chain
-* 
+*
 * A swap chain is a collection of framebuffers used for rendering and presentation to the windowing system
 *
 * Copyright (C) 2016-2023 by Sascha Willems - www.saschawillems.de
@@ -10,7 +10,7 @@
 
 #include "VulkanSwapChain.h"
 
-/** @brief Creates the platform specific surface abstraction of the native platform window used for presentation */	
+/** @brief Creates the platform specific surface abstraction of the native platform window used for presentation */
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
 void VulkanSwapChain::initSurface(void* platformHandle, void* platformWindow)
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -101,7 +101,7 @@ void VulkanSwapChain::initSurface(uint32_t width, uint32_t height)
 	// Find a queue with present support
 	// Will be used to present the swap chain images to the windowing system
 	std::vector<VkBool32> supportsPresent(queueCount);
-	for (uint32_t i = 0; i < queueCount; i++) 
+	for (uint32_t i = 0; i < queueCount; i++)
 	{
 		vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &supportsPresent[i]);
 	}
@@ -110,16 +110,16 @@ void VulkanSwapChain::initSurface(uint32_t width, uint32_t height)
 	// families, try to find one that supports both
 	uint32_t graphicsQueueNodeIndex = UINT32_MAX;
 	uint32_t presentQueueNodeIndex = UINT32_MAX;
-	for (uint32_t i = 0; i < queueCount; i++) 
+	for (uint32_t i = 0; i < queueCount; i++)
 	{
-		if ((queueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0) 
+		if ((queueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0)
 		{
-			if (graphicsQueueNodeIndex == UINT32_MAX) 
+			if (graphicsQueueNodeIndex == UINT32_MAX)
 			{
 				graphicsQueueNodeIndex = i;
 			}
 
-			if (supportsPresent[i] == VK_TRUE) 
+			if (supportsPresent[i] == VK_TRUE)
 			{
 				graphicsQueueNodeIndex = i;
 				presentQueueNodeIndex = i;
@@ -127,13 +127,13 @@ void VulkanSwapChain::initSurface(uint32_t width, uint32_t height)
 			}
 		}
 	}
-	if (presentQueueNodeIndex == UINT32_MAX) 
-	{	
+	if (presentQueueNodeIndex == UINT32_MAX)
+	{
 		// If there's no queue that supports both present and graphics
 		// try to find a separate present queue
-		for (uint32_t i = 0; i < queueCount; ++i) 
+		for (uint32_t i = 0; i < queueCount; ++i)
 		{
-			if (supportsPresent[i] == VK_TRUE) 
+			if (supportsPresent[i] == VK_TRUE)
 			{
 				presentQueueNodeIndex = i;
 				break;
@@ -142,13 +142,13 @@ void VulkanSwapChain::initSurface(uint32_t width, uint32_t height)
 	}
 
 	// Exit if either a graphics or a presenting queue hasn't been found
-	if (graphicsQueueNodeIndex == UINT32_MAX || presentQueueNodeIndex == UINT32_MAX) 
+	if (graphicsQueueNodeIndex == UINT32_MAX || presentQueueNodeIndex == UINT32_MAX)
 	{
 		vks::tools::exitFatal("Could not find a graphics and/or presenting queue!", -1);
 	}
 
 	// todo : Add support for separate graphics and presenting queue
-	if (graphicsQueueNodeIndex != presentQueueNodeIndex) 
+	if (graphicsQueueNodeIndex != presentQueueNodeIndex)
 	{
 		vks::tools::exitFatal("Separate graphics and presenting queues are not supported yet!", -1);
 	}
@@ -166,10 +166,10 @@ void VulkanSwapChain::initSurface(uint32_t width, uint32_t height)
 	// We want to get a format that best suits our needs, so we try to get one from a set of preferred formats
 	// Initialize the format to the first one returned by the implementation in case we can't find one of the preffered formats
 	VkSurfaceFormatKHR selectedFormat = surfaceFormats[0];
-	std::vector<VkFormat> preferredImageFormats = { 
+	std::vector<VkFormat> preferredImageFormats = {
 		VK_FORMAT_B8G8R8A8_UNORM,
-		VK_FORMAT_R8G8B8A8_UNORM, 
-		VK_FORMAT_A8B8G8R8_UNORM_PACK32 
+		VK_FORMAT_R8G8B8A8_UNORM,
+		VK_FORMAT_A8B8G8R8_UNORM_PACK32
 	};
 
 	for (auto& availableFormat : surfaceFormats) {
@@ -185,7 +185,7 @@ void VulkanSwapChain::initSurface(uint32_t width, uint32_t height)
 
 /**
 * Set instance, physical and logical device to use for the swapchain and get all required function pointers
-* 
+*
 * @param instance Vulkan instance to use
 * @param physicalDevice Physical device used to query properties and formats relevant to the swapchain
 * @param device Logical representation of the device to create the swapchain for
@@ -198,9 +198,9 @@ void VulkanSwapChain::connect(VkInstance instance, VkPhysicalDevice physicalDevi
 	this->device = device;
 }
 
-/** 
+/**
 * Create the swapchain and get its images with given width and height
-* 
+*
 * @param width Pointer to the width of the swapchain (may be adjusted to fit the requirements of the swapchain)
 * @param height Pointer to the height of the swapchain (may be adjusted to fit the requirements of the swapchain)
 * @param vsync (Optional) Can be used to force vsync-ed rendering (by using VK_PRESENT_MODE_FIFO_KHR as presentation mode)
@@ -343,8 +343,8 @@ void VulkanSwapChain::create(uint32_t *width, uint32_t *height, bool vsync, bool
 
 	// If an existing swap chain is re-created, destroy the old swap chain
 	// This also cleans up all the presentable images
-	if (oldSwapchain != VK_NULL_HANDLE) 
-	{ 
+	if (oldSwapchain != VK_NULL_HANDLE)
+	{
 		for (uint32_t i = 0; i < imageCount; i++)
 		{
 			vkDestroyImageView(device, buffers[i].view, nullptr);
@@ -387,7 +387,7 @@ void VulkanSwapChain::create(uint32_t *width, uint32_t *height, bool vsync, bool
 	}
 }
 
-/** 
+/**
 * Acquires the next image in the swap chain
 *
 * @param presentCompleteSemaphore (Optional) Semaphore that is signaled when the image is ready for use
@@ -455,11 +455,11 @@ void VulkanSwapChain::cleanup()
 #if defined(_DIRECT2DISPLAY)
 /**
 * Create direct to display surface
-*/	
+*/
 void VulkanSwapChain::createDirect2DisplaySurface(uint32_t width, uint32_t height)
 {
 	uint32_t displayPropertyCount;
-		
+
 	// Get display property
 	vkGetPhysicalDeviceDisplayPropertiesKHR(physicalDevice, &displayPropertyCount, NULL);
 	VkDisplayPropertiesKHR* pDisplayProperties = new VkDisplayPropertiesKHR[displayPropertyCount];
@@ -589,4 +589,4 @@ void VulkanSwapChain::createDirect2DisplaySurface(uint32_t width, uint32_t heigh
 	delete[] pDisplayProperties;
 	delete[] pPlaneProperties;
 }
-#endif 
+#endif
